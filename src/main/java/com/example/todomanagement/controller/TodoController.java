@@ -1,11 +1,15 @@
 package com.example.todomanagement.controller;
 
+import com.example.todomanagement.dto.LoginRequestDto;
 import com.example.todomanagement.dto.TodoDto;
+import com.example.todomanagement.security.JwtUtil;
 import com.example.todomanagement.service.TodoService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +19,20 @@ import java.util.List;
 @RequestMapping("api/todos")
 public class TodoController {
     private TodoService todoService;
+    private AuthenticationManager authenticationManager;
+    private JwtUtil jwtUtil;
+
+    @PostMapping("login")
+    public ResponseEntity<String> login(@RequestBody LoginRequestDto requestDto) {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
+                requestDto.getUsername(),
+                requestDto.getPassword()
+        );
+        authenticationManager.authenticate(token);
+        String jwt = jwtUtil.generate(requestDto.getUsername());
+        return ResponseEntity.ok(jwt);
+    }
+
     @PreAuthorize("hasRole(\"ADMIN\")")
     @PostMapping
     public ResponseEntity<TodoDto> addTodo(@RequestBody TodoDto todoDto) {
