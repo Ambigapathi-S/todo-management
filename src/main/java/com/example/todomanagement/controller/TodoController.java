@@ -13,7 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin("*")
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/todos")
@@ -52,18 +52,27 @@ public class TodoController {
         return ResponseEntity.ok().body(todoDto);
     }
     @PreAuthorize("hasRole(\"ADMIN\")")
-    @PutMapping("/update/{id}")
+    @PutMapping("{id}")
     public ResponseEntity<TodoDto> updateTodo(@RequestBody TodoDto todoDto, @PathVariable("id") Long id) {
-        TodoDto updatedUser = todoService.getTodo(id);
-        updatedUser.setTitle(todoDto.getTitle());
-        updatedUser.setDescription(todoDto.getDescription());
-        updatedUser.setCompleted(todoDto.isCompleted());
-        return new ResponseEntity<>(todoService.addTodo(updatedUser), HttpStatus.OK);
+        TodoDto updatedTodo = todoService.updateTodo(todoDto, id);
+        return ResponseEntity.ok(updatedTodo);
     }
     @PreAuthorize("hasRole(\"ADMIN\")")
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<String> deleteTodo(@PathVariable("id") Long id) {
         todoService.deleteTodo(id);
         return ResponseEntity.ok("Task deleted successfully!");
+    }
+    @PatchMapping("{id}/complete")
+    public ResponseEntity<TodoDto> completeTodo(@PathVariable("id") Long todoId){
+        TodoDto updatedTodo = todoService.completeTodo(todoId);
+        return ResponseEntity.ok(updatedTodo);
+    }
+
+    // Build In Complete Todo REST API
+    @PatchMapping("{id}/in-complete")
+    public ResponseEntity<TodoDto> inCompleteTodo(@PathVariable("id") Long todoId){
+        TodoDto updatedTodo = todoService.inCompleteTodo(todoId);
+        return ResponseEntity.ok(updatedTodo);
     }
 }
